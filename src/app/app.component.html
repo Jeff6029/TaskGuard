@@ -1,0 +1,46 @@
+<main class="container">
+  <h1>TaskGuard</h1>
+  <p>
+    Activa el monitor para usar la cámara y bloquear tu sesión automáticamente
+    cuando no detecte tu rostro durante varios segundos.
+  </p>
+
+  <div class="row controls">
+    <button type="button" (click)="startMonitoring()" [disabled]="monitoring || locking">
+      Iniciar monitor
+    </button>
+    <button type="button" (click)="stopMonitoring()" [disabled]="!monitoring || locking">
+      Detener monitor
+    </button>
+    <button type="button" (click)="lockNow()" [disabled]="locking">
+      {{ locking ? "Bloqueando..." : "Bloquear sesión ahora" }}
+    </button>
+  </div>
+
+  <video #cameraVideo class="camera" autoplay playsinline muted></video>
+
+  <p>Estado cámara: {{ cameraStatus }}</p>
+  <p>Detección: {{ faceDetected ? "Presente" : "No detectado" }}</p>
+  <p>Ausencia actual: {{ absenceSeconds }}s</p>
+  <p>Umbral de ausencia: {{ absenceThresholdSeconds }}s</p>
+  <label class="threshold">
+    Ajustar umbral
+    <input
+      type="range"
+      min="1"
+      max="5"
+      step="1"
+      [disabled]="locking"
+      [(ngModel)]="absenceThresholdSeconds"
+    />
+  </label>
+
+  <label class="autolock">
+    <input type="checkbox" [(ngModel)]="autoLockEnabled" [disabled]="locking" />
+    Bloqueo automático habilitado
+  </label>
+
+  <p>{{ lockStatus }}</p>
+
+  <router-outlet />
+</main>
