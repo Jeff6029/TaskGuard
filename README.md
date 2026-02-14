@@ -1,24 +1,24 @@
 # TaskGuard
 
-TaskGuard es una app de escritorio (Angular + Tauri + Rust) que usa la cámara para detectar ausencia y bloquear la sesión automáticamente.
+TaskGuard is a desktop app (Angular + Tauri + Rust) that uses your camera to detect absence and automatically lock the session.
 
-## Requisitos
+## Requirements
 
-- Node.js 22 LTS (recomendado)
+- Node.js 22 LTS (recommended)
 - npm
 - Rust (stable) + Cargo
-- Dependencias de Tauri para tu sistema operativo
+- Tauri prerequisites for your operating system
 
-## Levantar la app en desarrollo
+## Run in development
 
-Desde la raíz del proyecto:
+From the project root:
 
 ```bash
 npm install
 npm run tauri dev
 ```
 
-## Compilar
+## Build
 
 Frontend:
 
@@ -26,28 +26,28 @@ Frontend:
 npm run build
 ```
 
-Backend Rust (verificación):
+Rust backend (check):
 
 ```bash
 cd src-tauri
 cargo check
 ```
 
-## Cómo usar TaskGuard
+## How to use TaskGuard
 
-1. Abre la app y pulsa **Iniciar monitor**.
-2. Acepta permisos de cámara cuando el sistema lo pida.
-3. Ajusta el umbral de ausencia (1 a 5 segundos).
-4. Si no se detecta rostro durante el umbral, la app intentará bloquear la sesión.
-5. Puedes probar manualmente con **Bloquear sesión ahora**.
+1. Open the app and click **Start monitor**.
+2. Allow camera permissions when prompted by the OS.
+3. Set the absence threshold (1 to 5 seconds).
+4. If no face is detected for the configured threshold, the app will attempt to lock the session.
+5. You can test manually with **Lock session now**.
 
-## Comportamiento de bloqueo por sistema
+## Lock behavior by operating system
 
-- **macOS**: intenta varios métodos de bloqueo compatibles (incluyendo atajo de bloqueo del sistema).
-- **Windows**: usa el equivalente a `Win + L`.
-- **Linux**: intenta comandos comunes según el entorno de escritorio.
+- **macOS**: tries multiple compatible lock methods (including the system lock shortcut).
+- **Windows**: uses the equivalent of `Win + L`.
+- **Linux**: tries common lock commands depending on the desktop environment.
 
-## Notas importantes
+## Important notes
 
-- En macOS puede ser necesario conceder permisos de Accesibilidad/Automatización para el bloqueo por script.
-- Si usas una versión no LTS de Node, Angular puede mostrar advertencias.
+- On macOS, you may need to grant Accessibility/Automation permissions for script-based locking.
+- If you use a non-LTS Node version, Angular may show warnings.
