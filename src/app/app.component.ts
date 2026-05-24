@@ -119,14 +119,29 @@ export class AppComponent implements OnDestroy {
     this.lockStatus = `${reason}: intentando bloquear la sesión...`;
 
     try {
-      await invoke("lock_session");
+      const method = await invoke<string>("lock_session");
       this.lastLockAttemptAt = Date.now();
-      this.lockStatus = "Comando enviado. Si tu SO lo permite, la sesión se bloqueará ahora.";
+      this.lockStatus = `Bloqueo ejecutado con: ${method}`;
+
+      if (method.includes("pmset")) {
+        this.lockStatus +=
+          " (modo reposo de pantalla). En macOS activa 'pedir contraseña inmediatamente' para que solicite clave al volver.";
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.lockStatus = `No se pudo bloquear la sesión: ${message}`;
     } finally {
       this.locking = false;
+    }
+  }
+
+  async openAccessibilitySettings(): Promise<void> {
+    try {
+      await invoke("open_accessibility_settings");
+      this.lockStatus = "Se abrió Ajustes > Privacidad y seguridad > Accesibilidad.";
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.lockStatus = `No se pudieron abrir los ajustes: ${message}`;
     }
   }
 

@@ -15,6 +15,9 @@
     <button type="button" (click)="lockNow()" [disabled]="locking">
       {{ locking ? "Bloqueando..." : "Bloquear sesión ahora" }}
     </button>
+    <button type="button" (click)="openAccessibilitySettings()">
+      Abrir ajustes de accesibilidad (macOS)
+    </button>
   </div>
 
   <video #cameraVideo class="camera" autoplay playsinline muted></video>

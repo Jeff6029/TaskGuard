@@ -29,12 +29,12 @@ fn run_and_check(program: &str, args: &[&str]) -> Result<(), String> {
     ))
 }
 
-fn try_commands(attempts: &[(&str, Vec<&str>)]) -> Result<(), String> {
+fn try_commands(attempts: &[(&str, Vec<&str>)]) -> Result<String, String> {
     let mut errors: Vec<String> = Vec::new();
 
     for (program, args) in attempts {
         match run_and_check(program, args) {
-            Ok(()) => return Ok(()),
+            Ok(()) => return Ok((*program).to_string()),
             Err(error) => errors.push(error),
         }
     }
@@ -43,10 +43,11 @@ fn try_commands(attempts: &[(&str, Vec<&str>)]) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn lock_session() -> Result<(), String> {
+fn lock_session() -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
-        return run_and_check("rundll32.exe", &["user32.dll,LockWorkStation"]);
+        run_and_check("rundll32.exe", &["user32.dll,LockWorkStation"])?;
+        return Ok("rundll32.exe user32.dll,LockWorkStation".to_string());
     }
 
     #[cfg(target_os = "macos")]
@@ -63,10 +64,13 @@ fn lock_session() -> Result<(), String> {
                     "tell application \"System Events\" to keystroke \"q\" using {control down, command down}",
                 ],
             ),
-            ("/usr/bin/open", vec!["-a", "ScreenSaverEngine"]),
             ("/usr/bin/pmset", vec!["displaysleepnow"]),
         ])
-        .map_err(|error| format!("No se pudo bloquear la sesión en macOS. {error}"));
+        .map_err(|error| {
+            format!(
+                "No se pudo bloquear la sesión en macOS. {error}. Activa permisos de Accesibilidad para la app (y para Terminal al probar por consola)."
+            )
+        });
     }
 
     #[cfg(target_os = "linux")]
@@ -76,8 +80,8 @@ fn lock_session() -> Result<(), String> {
             ("xdg-screensaver", vec!["lock"]),
             ("gnome-screensaver-command", vec!["-l"]),
         ];
-        return try_commands(&attempts).map_err(|_| {
-            "No se encontró un comando compatible para bloquear la sesión en Linux.".to_string()
+        return try_commands(&attempts).map_err(|error| {
+            format!("No se encontró un comando compatible para bloquear la sesión en Linux. {error}")
         });
     }
 
@@ -85,11 +89,25 @@ fn lock_session() -> Result<(), String> {
     Err("Sistema operativo no soportado para bloqueo de sesión.".to_string())
 }
 
+#[tauri::command]
+fn open_accessibility_settings() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        return run_and_check(
+            "/usr/bin/open",
+            &["x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"],
+        );
+    }
+
+    #[allow(unreachable_code)]
+    Err("Esta opción solo está disponible en macOS.".to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, lock_session])
+    .invoke_handler(tauri::generate_handler![greet, lock_session, open_accessibility_settings])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
